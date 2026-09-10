@@ -19,28 +19,50 @@ export function PresidentialTribute() {
           </h2>
           <p className="mt-6 font-sans text-base leading-relaxed text-muted-foreground lg:text-lg">
             Son Excellence le président Mamadi Doumbouya, président de la
-            République de Guinée. NIDDAY s’inscrit dans une ambition de
+            République de Guinée, aux côtés d’Abdoulaye Coumbassa, créateur du
+            site NIDDAY. Ensemble, cette présentation porte une ambition de
             responsabilité publique, de traçabilité et de confiance dans la
             gestion des ressources.
           </p>
         </div>
 
-        <figure className="mx-auto w-full max-w-[420px]">
-          <div className="overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
-            <Image
-              src="/images/institutional/mamadi-doumbouya.png"
-              alt="Son Excellence le président Mamadi Doumbouya, président de la République de Guinée"
-              width={538}
-              height={832}
-              sizes="(min-width: 1024px) 420px, 90vw"
-              className="h-auto w-full object-cover"
-            />
-          </div>
-          <figcaption className="mt-3 text-center font-sans text-xs text-muted-foreground">
-            Son Excellence Monsieur Mamadi Doumbouya — Président de la
-            République de Guinée
-          </figcaption>
-        </figure>
+        <div className="mx-auto grid w-full max-w-[520px] grid-cols-2 items-end gap-3 sm:gap-5">
+          <figure>
+            <div className="overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
+              <Image
+                src="/images/institutional/mamadi-doumbouya.png"
+                alt="Son Excellence le président Mamadi Doumbouya, président de la République de Guinée"
+                width={538}
+                height={832}
+                sizes="(min-width: 1024px) 250px, 45vw"
+                className="h-auto w-full object-cover"
+              />
+            </div>
+            <figcaption className="mt-3 text-center font-sans text-xs text-muted-foreground">
+              Son Excellence Monsieur Mamadi Doumbouya
+              <span className="block">
+                Président de la République de Guinée
+              </span>
+            </figcaption>
+          </figure>
+
+          <figure>
+            <div className="overflow-hidden rounded-2xl border border-border bg-muted shadow-sm">
+              <Image
+                src="/images/institutional/abdoulaye-coumbassa.jpg"
+                alt="Abdoulaye Coumbassa, créateur du site NIDDAY"
+                width={460}
+                height={460}
+                sizes="(min-width: 1024px) 250px, 45vw"
+                className="aspect-square h-auto w-full object-cover"
+              />
+            </div>
+            <figcaption className="mt-3 text-center font-sans text-xs text-muted-foreground">
+              Abdoulaye Coumbassa
+              <span className="block">Créateur du site NIDDAY</span>
+            </figcaption>
+          </figure>
+        </div>
       </div>
     </section>
   );
