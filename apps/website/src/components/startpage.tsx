@@ -80,7 +80,7 @@ const videos = [
   {
     id: "overview",
     title: "Overview",
-    subtitle: "See how Midday helps you run your business without the admin.",
+    subtitle: "See how NIDDAY connects financial activity to accountable outcomes.",
     url: "https://cdn.midday.ai/videos/login-video.mp4",
   },
   {
@@ -266,25 +266,25 @@ export function StartPage() {
             <div className="flex flex-col items-center w-full text-center space-y-6 lg:space-y-8">
               <div className="space-y-5 lg:space-y-6 max-w-3xl 3xl:max-w-5xl mx-auto px-2 lg:px-0">
                 <Link
-                  href="/updates/joining-ramp"
+                  href="/docs"
                   className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-border text-xs font-sans text-muted-foreground hover:text-foreground hover:border-foreground/30 transition-colors"
                 >
-                  Midday is joining Ramp
+                  NIDDAY platform foundation
                   <span aria-hidden="true">&rarr;</span>
                 </Link>
 
                 <h1 className="font-serif text-3xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-7xl 3xl:text-8xl leading-[1.1] tracking-tight text-foreground">
-                  The business stack for{" "}
+                  Financial intelligence with{" "}
                   <em className="not-italic text-muted-foreground/80">
                     modern
                   </em>{" "}
-                  founders
+                  public traceability
                 </h1>
 
                 <p className="text-muted-foreground text-base lg:text-lg leading-relaxed font-sans max-w-xl mx-auto">
-                  Send invoices, automatic reconciliation, track billable hours,
-                  get financial insights, and export clean books to your
-                  accountant.
+                  Preserve the financial workflows you rely on while building a
+                  verifiable path from transactions and documents to projects,
+                  evidence, and audit-ready outcomes.
                 </p>
               </div>
 
@@ -294,7 +294,7 @@ export function StartPage() {
                   className="btn-inverse h-11 px-6 transition-colors"
                 >
                   <a
-                    href="https://app.midday.ai/"
+                    href={process.env.NEXT_PUBLIC_APP_URL ?? "#"}
                     onClick={() =>
                       track({
                         event: LogEvents.CTA.name,
@@ -305,13 +305,13 @@ export function StartPage() {
                     }
                   >
                     <span className="text-inherit text-sm">
-                      Start your trial
+                      Access the platform
                     </span>
                   </a>
                 </Button>
 
                 <p className="text-muted-foreground text-xs font-sans">
-                  14-day free trial · Cancel anytime
+                  Configure your deployment URL to enable access
                 </p>
 
                 <div className="flex items-center justify-center gap-3 pt-4">

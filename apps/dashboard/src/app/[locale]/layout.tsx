@@ -12,14 +12,14 @@ import { isDesktopApp } from "@/utils/desktop";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://app.midday.ai"),
-  title: "Midday | Run your business smarter",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL ?? "http://localhost:3001"),
+  title: "NIDDAY | Financial intelligence and traceability",
   description:
-    "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+    "Manage financial activity, documents, and projects with a foundation for accountable traceability.",
   twitter: {
-    title: "Midday | Run your business smarter",
+    title: "NIDDAY | Financial intelligence and traceability",
     description:
-      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
+      "Manage financial activity, documents, and projects with a foundation for accountable traceability.",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
@@ -34,11 +34,11 @@ export const metadata: Metadata = {
     ],
   },
   openGraph: {
-    title: "Midday | Run your business smarter",
+    title: "NIDDAY | Financial intelligence and traceability",
     description:
-      "Automate financial tasks, stay organized, and make informed decisions effortlessly.",
-    url: "https://app.midday.ai",
-    siteName: "Midday",
+      "Manage financial activity, documents, and projects with a foundation for accountable traceability.",
+    url: process.env.NEXT_PUBLIC_URL ?? "http://localhost:3001",
+    siteName: "NIDDAY",
     images: [
       {
         url: "https://cdn.midday.ai/opengraph-image-v1.jpg",

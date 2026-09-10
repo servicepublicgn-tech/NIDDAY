@@ -35,46 +35,36 @@ const hedvigSerif = Hedvig_Letters_Serif({
 export const metadata: Metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "Midday — The business stack for modern founders",
-    template: "%s | Midday",
+    default: "NIDDAY — Financial Intelligence & Public Traceability",
+    template: "%s | NIDDAY",
   },
   description:
-    "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+    "Financial intelligence and public traceability for accountable organizations, projects, documents, and evidence.",
   openGraph: {
-    title: "Midday — The business stack for modern founders",
+    title: "NIDDAY — Financial Intelligence & Public Traceability",
     description:
-      "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+      "Financial intelligence and public traceability for accountable organizations, projects, documents, and evidence.",
     url: baseUrl,
-    siteName: "Midday",
+    siteName: "NIDDAY",
     locale: "en_US",
     type: "website",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
-        width: 1800,
-        height: 1600,
+        url: "/api/og?title=NIDDAY&description=Financial%20Intelligence%20%26%20Public%20Traceability",
+        width: 1200,
+        height: 630,
       },
     ],
   },
   twitter: {
-    title: "Midday — The business stack for modern founders",
+    title: "NIDDAY — Financial Intelligence & Public Traceability",
     description:
-      "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+      "Financial intelligence and public traceability for accountable organizations, projects, documents, and evidence.",
     images: [
       {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
-        width: 800,
-        height: 600,
-      },
-      {
-        url: "https://cdn.midday.ai/opengraph-image-v1.jpg",
-        width: 1800,
-        height: 1600,
+        url: "/api/og?title=NIDDAY&description=Financial%20Intelligence%20%26%20Public%20Traceability",
+        width: 1200,
+        height: 630,
       },
     ],
   },
@@ -101,24 +91,16 @@ export const viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
-  name: "Midday",
-  url: "https://midday.ai",
-  logo: "https://cdn.midday.ai/logo.png",
-  sameAs: [
-    "https://x.com/middayai",
-    "https://github.com/midday-ai/midday",
-    "https://linkedin.com/company/midday-ai",
-  ],
+  name: "NIDDAY",
+  url: baseUrl,
   description:
-    "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+    "Financial intelligence and public traceability for accountable organizations, projects, documents, and evidence.",
 };
 
 export default function Layout({ children }: { children: ReactElement }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://cdn.midday.ai" />
-        <link rel="dns-prefetch" href="https://cdn.midday.ai" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

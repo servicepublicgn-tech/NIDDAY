@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
 import type { Testimonial } from "./sections/testimonials-section";
 import { defaultTestimonials } from "./sections/testimonials-section";
+import { NiddayMark } from "./nidday-mark";
 
 // All testimonials for header rotation (includes default + new ones)
 const headerTestimonials: Testimonial[] = [
@@ -266,13 +267,13 @@ export function Header({
             className="flex items-center gap-2 hover:opacity-80 active:opacity-80 transition-opacity duration-200 touch-manipulation"
             onClick={() => setIsMenuOpen(false)}
             style={{ WebkitTapHighlightColor: "transparent" }}
-            aria-label="Midday - Go to homepage"
+            aria-label="NIDDAY - Go to homepage"
           >
             <div className="w-6 h-6">
-              <Icons.LogoSmall className="w-full h-full text-foreground" />
+              <NiddayMark className="w-full h-full" />
             </div>
             <span className="font-sans text-base xl:hidden text-foreground">
-              midday
+              NIDDAY
             </span>
           </Link>
 
