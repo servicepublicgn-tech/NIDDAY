@@ -18,11 +18,11 @@ export function PresidentialTribute() {
             Une vision nationale au service de la transparence
           </h2>
           <p className="mt-6 font-sans text-base leading-relaxed text-muted-foreground lg:text-lg">
-            Son Excellence le président Mamadi Doumbouya, président de la
-            République de Guinée, aux côtés d’Abdoulaye Coumbassa, créateur du
-            site NIDDAY. Ensemble, cette présentation porte une ambition de
-            responsabilité publique, de traçabilité et de confiance dans la
-            gestion des ressources.
+            NIDDAY est une initiative indépendante créée par Abdoulaye
+            Coumbassa, visant à renforcer la traçabilité, la responsabilité et
+            la confiance dans la gestion des ressources. La plateforme
+            ambitionne de pouvoir servir, à terme, les organisations publiques,
+            privées et citoyennes.
           </p>
         </div>
 
