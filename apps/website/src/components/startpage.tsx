@@ -51,6 +51,9 @@ const IntegrationsSection = dynamic(() =>
 const TraceabilityFoundation = dynamic(() =>
   import("./traceability-foundation").then((m) => m.TraceabilityFoundation),
 );
+const PresidentialTribute = dynamic(() =>
+  import("./presidential-tribute").then((m) => m.PresidentialTribute),
+);
 
 // Static features data - moved outside component to avoid recreation on each render
 const features = [
@@ -898,6 +901,9 @@ export function StartPage() {
 
       {/* NIDDAY public traceability direction */}
       <TraceabilityFoundation />
+
+      {/* Institutional portrait supplied for the Guinea landing page */}
+      <PresidentialTribute />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">
