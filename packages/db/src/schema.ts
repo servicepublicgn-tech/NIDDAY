@@ -3944,11 +3944,7 @@ export const niddayRoleAssignments = pgTable(
   },
   (table) => [
     uniqueIndex("nidday_role_assignments_active_unique")
-      .on(
-        table.teamId,
-        table.userId,
-        table.role,
-      )
+      .on(table.teamId, table.userId, table.role)
       .where(sql`revoked_at IS NULL`),
     index("nidday_role_assignments_team_user_idx").on(
       table.teamId,
@@ -3997,7 +3993,10 @@ export const evidenceItems = pgTable(
     byteSize: bigint("byte_size", { mode: "number" }),
     status: evidenceStatusEnum().default("pending").notNull(),
     metadata: jsonb().default(sql`'{}'::jsonb`).notNull(),
-    verifiedAt: timestamp("verified_at", { withTimezone: true, mode: "string" }),
+    verifiedAt: timestamp("verified_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
     verifiedBy: uuid("verified_by"),
     createdAt: timestamp("created_at", {
       withTimezone: true,
