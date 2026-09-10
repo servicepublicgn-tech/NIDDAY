@@ -80,7 +80,8 @@ const videos = [
   {
     id: "overview",
     title: "Overview",
-    subtitle: "See how NIDDAY connects financial activity to accountable outcomes.",
+    subtitle:
+      "See how NIDDAY connects financial activity to accountable outcomes.",
     url: "https://cdn.midday.ai/videos/login-video.mp4",
   },
   {
