@@ -4,7 +4,9 @@ import { getAllCompetitorSlugs } from "@/data/competitors";
 import { getBlogPosts } from "@/lib/blog";
 import { getAllDocSlugs } from "@/lib/docs";
 
-export const baseUrl = "https://midday.ai";
+export const baseUrl =
+  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
+  "https://nidday.example";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lastModified = new Date().toISOString().split("T")[0];

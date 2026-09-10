@@ -1,89 +1,58 @@
-![hero](github.png)
+# NIDDAY
 
-<p align="center">
-	<h1 align="center"><b>Midday</b></h1>
-<p align="center">
-    Your AI-Powered Business Assistant
-    <br />
-    <br />
-    <a href="https://midday.ai">Website</a>
-    ·
-    <a href="https://github.com/midday-ai/midday/issues">Issues</a>
-  </p>
-</p>
+**NIDDAY is a Financial Intelligence and Public Traceability Platform.** It evolves the Midday codebase without discarding its production capabilities for transactions, invoicing, customers, documents, projects, exports, AI-assisted workflows, integrations, API access, background processing, and desktop distribution.
 
-<p align="center">
-  <a href="https://go.midday.ai/K7GwMoQ">
-    <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase" />
-  </a>
-</p>
+## Architecture
 
-## About Midday
+This repository is a Bun + Turborepo monorepo.
 
-Midday is an all-in-one tool designed to help freelancers, contractors, consultants, and solo entrepreneurs manage their business operations more efficiently. It integrates various functions typically scattered across multiple platforms into a single, cohesive system.
+| Area | Location | Responsibility |
+| --- | --- | --- |
+| Marketing site | `apps/website` | Next.js website, product metadata, documentation, and public pages. |
+| Application dashboard | `apps/dashboard` | Next.js authenticated product interface. |
+| API | `apps/api` | Hono API, typed application endpoints, integrations, and service boundary. |
+| Worker | `apps/worker` | BullMQ queue processors, scheduled work, imports, documents, notifications, and insight generation. |
+| Desktop | `apps/desktop` | Tauri desktop application. |
+| Database | `packages/db` | Drizzle PostgreSQL schema, migrations, RLS-aware policies, queries, and database tests. |
+| Supabase | `packages/supabase` | Optional auth, storage, middleware, and database-client integration boundary. |
+| Shared platform | `packages/*` | Finance, banking, documents, events, UI, MCP apps, AI connectors, encryption, and utilities. |
 
+The operational deployment boundary is intentionally separate: the website can run on Vercel; API/dashboard services use a Node-compatible runtime; BullMQ workers require a persistent worker runtime plus Redis; PostgreSQL remains external. Supabase is compatible for PostgreSQL, auth, and storage, but is not required merely to build the repository.
 
-## Features
+## Local development
 
-**Time Tracking**: Allows for live time tracking of projects to boost productivity and collaboration, providing insightful project overviews.<br/>
-**Invoicing**: An upcoming feature that will enable users to create web-based invoices, collaborate in real-time, and synchronize projects seamlessly.<br/>
-**Magic Inbox**: Automatically matches incoming invoices or receipts to the correct transactions, simplifying financial tracking and organization.<br/>
-**Vault**: Secure storage for important files like contracts and agreements, keeping everything in one place for easy access​.<br/>
-**Seamless Export**: Facilitates easy export of financial data, packaged neatly in CSV files for accountants.<br/>
-**Assistant**: Provides tailored insights into financial situations, helping users understand spending patterns, cut costs, and find documents.<br/>
+1. Install [Bun](https://bun.sh/) 1.3.11 or compatible.
+2. Run `bun install`.
+3. Copy the template appropriate to each application (for example `cp apps/website/.env-template apps/website/.env.local`). Do not commit populated environment files.
+4. Start a service with `bun run dev:website`, `bun run dev:dashboard`, or `bun run dev:api`. Run the worker separately with its workspace command.
 
+The public website requires `NEXT_PUBLIC_SITE_URL` for production canonical URLs and `NEXT_PUBLIC_APP_URL` only when an application dashboard is deployed. The API, dashboard, worker, jobs, and insight templates enumerate their provider-specific variables. `DATABASE_URL`/the existing database pooler variables must point to PostgreSQL for database-backed runtime paths.
 
+## Validation
 
+```bash
+bun run lint
+bun run typecheck
+bun run test
+bun run build
+```
 
-## Get started
+Database integration tests need PostgreSQL and the documented test database setup in `packages/db`. Some builds also require optional service configuration where an application evaluates provider-backed routes.
 
-We are working on the documentation to get started with Midday for local development: https://docs.midday.ai
+## Security principles
 
-## App Architecture
+- Never commit credentials, tokens, database URLs with passwords, or private keys.
+- Keep the existing Supabase RLS and team-scoping model in place; do not treat UI controls as authorization.
+- Keep workers and queues outside a serverless-only deployment model.
+- Use the existing encryption, storage, API validation, and event infrastructure when adding evidence or traceability functionality.
+- Location features must be explicit, permission-controlled, and privacy-aware; NIDDAY does not implement covert tracking.
 
-- Monorepo
-- Bun
-- React
-- TypeScript
-- Nextjs
-- Supabase
-- Shadcn
-- Tauri
-- Expo
-- TailwindCSS
+## NIDDAY roadmap
 
-### Hosting
+The current foundation preserves existing financial workflows. Future work should be delivered as migrations and typed APIs—not mock modules—toward: financial traceability links, append-oriented audit records, evidence metadata and verification, authorized project geography, and project/infrastructure milestones.
 
-- Supabase (database, storage, realtime, auth)
-- Railway (API, Worker, Dashboard)
-- Vercel (Website)
-- Cloudflare (Engine, CDN/Proxy)
-
-### Services
-
-- Trigger.dev (background jobs)
-- Resend (Transactional & Marketing)
-- Github Actions (CI/CD)
-- GoCardLess (Bank connection EU)
-- Plaid (Bank connection in Canada and US)
-- Teller (Bank connection in the US)
-- OpenPanel (Events and Analytics)
-- Polar (Payment processing)
-- Typesense (Search)
-- Gemini
-- OpenAI
-
-## Repo Activity
-
-![Alt](https://repobeats.axiom.co/api/embed/96aae855e5dd87c30d53c1d154b37cf7aa5a89b3.svg "Repobeats analytics image")
+See [the Phase 1 architecture report](docs/nidday-phase-1-audit.md) for the audited state, safe rename boundary, deployment model, health-check findings, and incremental migration plan.
 
 ## License
 
-This project is licensed under the **[AGPL-3.0](https://opensource.org/licenses/AGPL-3.0)** for non-commercial use. 
-
-### Commercial Use
-
-For commercial use or deployments requiring a setup fee, please contact us
-for a commercial license at [engineer@midday.ai](mailto:engineer@midday.ai).
-
-By using this software, you agree to the terms of the license.
+This project is licensed under **[AGPL-3.0](LICENSE)**. Review the license terms before commercial use or deployment.
