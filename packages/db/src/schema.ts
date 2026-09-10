@@ -9,6 +9,7 @@ import {
   integer,
   json,
   jsonb,
+  numeric,
   pgEnum,
   pgPolicy,
   pgTable,
@@ -217,6 +218,52 @@ export const auditSourceEnum = pgEnum("audit_source", [
   "worker",
   "integration",
   "system",
+]);
+export const procurementRequestStatusEnum = pgEnum(
+  "procurement_request_status",
+  [
+    "draft",
+    "submitted",
+    "reviewed",
+    "approved",
+    "contracted",
+    "active",
+    "completed",
+    "audited",
+    "closed",
+  ],
+);
+export const supplierVerificationStatusEnum = pgEnum(
+  "supplier_verification_status",
+  ["unverified", "pending", "verified", "rejected"],
+);
+export const procurementApprovalStatusEnum = pgEnum(
+  "procurement_approval_status",
+  ["pending", "approved", "rejected", "cancelled"],
+);
+export const procurementContractStatusEnum = pgEnum(
+  "procurement_contract_status",
+  ["draft", "active", "completed", "terminated"],
+);
+export const projectMilestoneStatusEnum = pgEnum("project_milestone_status", [
+  "planned",
+  "in_progress",
+  "completed",
+  "delayed",
+  "cancelled",
+]);
+export const traceabilityLinkTypeEnum = pgEnum("traceability_link_type", [
+  "source",
+  "allocation",
+  "approval",
+  "commitment",
+  "transaction",
+  "payment",
+  "evidence",
+  "project",
+  "supplier",
+  "invoice",
+  "outcome",
 ]);
 export const trackerStatusEnum = pgEnum("trackerStatus", [
   "in_progress",
@@ -460,14 +507,14 @@ export const transactions = pgTable(
     ),
     index("idx_transactions_team_id_date_name").using(
       "btree",
-      table.teamId.asc().nullsLast().op("date_ops"),
+      table.teamId.asc().nullsLast().op("uuid_ops"),
       table.date.asc().nullsLast().op("date_ops"),
-      table.name.asc().nullsLast().op("uuid_ops"),
+      table.name.asc().nullsLast().op("text_ops"),
     ),
     index("idx_transactions_team_id_name").using(
       "btree",
       table.teamId.asc().nullsLast().op("uuid_ops"),
-      table.name.asc().nullsLast().op("uuid_ops"),
+      table.name.asc().nullsLast().op("text_ops"),
     ),
     index("idx_trgm_name").using(
       "gist",
@@ -489,10 +536,10 @@ export const transactions = pgTable(
       "transactions_team_id_date_currency_bank_account_id_category_idx",
     ).using(
       "btree",
-      table.teamId.asc().nullsLast().op("enum_ops"),
+      table.teamId.asc().nullsLast().op("uuid_ops"),
       table.date.asc().nullsLast().op("date_ops"),
       table.currency.asc().nullsLast().op("text_ops"),
-      table.bankAccountId.asc().nullsLast().op("date_ops"),
+      table.bankAccountId.asc().nullsLast().op("uuid_ops"),
     ),
     index("transactions_team_id_idx").using(
       "btree",
@@ -1780,7 +1827,7 @@ export const documents = pgTable(
     ),
     index("documents_team_id_parent_id_idx").using(
       "btree",
-      table.teamId.asc().nullsLast().op("text_ops"),
+      table.teamId.asc().nullsLast().op("uuid_ops"),
       table.parentId.asc().nullsLast().op("text_ops"),
     ),
     // Composite index for common query pattern: teamId + createdAt DESC
@@ -3944,11 +3991,7 @@ export const niddayRoleAssignments = pgTable(
   },
   (table) => [
     uniqueIndex("nidday_role_assignments_active_unique")
-      .on(
-        table.teamId,
-        table.userId,
-        table.role,
-      )
+      .on(table.teamId, table.userId, table.role)
       .where(sql`revoked_at IS NULL`),
     index("nidday_role_assignments_team_user_idx").on(
       table.teamId,
@@ -3997,7 +4040,10 @@ export const evidenceItems = pgTable(
     byteSize: bigint("byte_size", { mode: "number" }),
     status: evidenceStatusEnum().default("pending").notNull(),
     metadata: jsonb().default(sql`'{}'::jsonb`).notNull(),
-    verifiedAt: timestamp("verified_at", { withTimezone: true, mode: "string" }),
+    verifiedAt: timestamp("verified_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
     verifiedBy: uuid("verified_by"),
     createdAt: timestamp("created_at", {
       withTimezone: true,
@@ -4422,4 +4468,335 @@ export const insightUserStatusRelations = relations(
       references: [users.id],
     }),
   }),
+);
+export const niddaySuppliers = pgTable(
+  "nidday_suppliers",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    legalName: text("legal_name").notNull(),
+    registrationId: text("registration_id"),
+    country: varchar({ length: 2 }),
+    verificationStatus: supplierVerificationStatusEnum("verification_status")
+      .default("unverified")
+      .notNull(),
+    metadata: jsonb().default(sql`'{}'::jsonb`).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("nidday_suppliers_team_registration_unique").on(
+      table.teamId,
+      table.registrationId,
+    ),
+    index("nidday_suppliers_team_status_idx").on(
+      table.teamId,
+      table.verificationStatus,
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_suppliers_team_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("NIDDAY suppliers are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
+);
+
+export const niddayProcurementRequests = pgTable(
+  "nidday_procurement_requests",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    projectId: uuid("project_id"),
+    requestedBy: uuid("requested_by"),
+    title: text().notNull(),
+    description: text(),
+    status: procurementRequestStatusEnum().default("draft").notNull(),
+    budgetAmount: numeric("budget_amount", { precision: 14, scale: 2 }),
+    currency: varchar({ length: 3 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("nidday_procurement_requests_team_status_idx").on(
+      table.teamId,
+      table.status,
+    ),
+    index("nidday_procurement_requests_project_idx").on(table.projectId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_procurement_requests_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [trackerProjects.id],
+      name: "nidday_procurement_requests_project_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.requestedBy],
+      foreignColumns: [users.id],
+      name: "nidday_procurement_requests_requested_by_fkey",
+    }).onDelete("set null"),
+    pgPolicy("NIDDAY procurement requests are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
+);
+
+export const niddayProcurementItems = pgTable(
+  "nidday_procurement_items",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    requestId: uuid("request_id").notNull(),
+    description: text().notNull(),
+    quantity: numeric({ precision: 14, scale: 3 }).notNull(),
+    unitPrice: numeric("unit_price", { precision: 14, scale: 2 }),
+    currency: varchar({ length: 3 }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("nidday_procurement_items_team_request_idx").on(
+      table.teamId,
+      table.requestId,
+    ),
+    index("nidday_procurement_items_request_idx").on(table.requestId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_procurement_items_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.requestId],
+      foreignColumns: [niddayProcurementRequests.id],
+      name: "nidday_procurement_items_request_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("NIDDAY procurement items are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
+);
+
+export const niddayProcurementApprovals = pgTable(
+  "nidday_procurement_approvals",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    requestId: uuid("request_id").notNull(),
+    approverId: uuid("approver_id"),
+    status: procurementApprovalStatusEnum().default("pending").notNull(),
+    comment: text(),
+    decidedAt: timestamp("decided_at", { withTimezone: true, mode: "string" }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("nidday_procurement_approvals_team_request_idx").on(
+      table.teamId,
+      table.requestId,
+    ),
+    index("nidday_procurement_approvals_request_idx").on(table.requestId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_procurement_approvals_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.requestId],
+      foreignColumns: [niddayProcurementRequests.id],
+      name: "nidday_procurement_approvals_request_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.approverId],
+      foreignColumns: [users.id],
+      name: "nidday_procurement_approvals_approver_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("NIDDAY procurement approvals are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
+);
+
+export const niddayProcurementContracts = pgTable(
+  "nidday_procurement_contracts",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    requestId: uuid("request_id"),
+    supplierId: uuid("supplier_id").notNull(),
+    projectId: uuid("project_id"),
+    contractNumber: text("contract_number").notNull(),
+    status: procurementContractStatusEnum().default("draft").notNull(),
+    value: numeric({ precision: 14, scale: 2 }),
+    currency: varchar({ length: 3 }),
+    startDate: date("start_date"),
+    endDate: date("end_date"),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("nidday_procurement_contracts_team_number_unique").on(
+      table.teamId,
+      table.contractNumber,
+    ),
+    index("nidday_procurement_contracts_team_status_idx").on(
+      table.teamId,
+      table.status,
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_procurement_contracts_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.requestId],
+      foreignColumns: [niddayProcurementRequests.id],
+      name: "nidday_procurement_contracts_request_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.supplierId],
+      foreignColumns: [niddaySuppliers.id],
+      name: "nidday_procurement_contracts_supplier_id_fkey",
+    }).onDelete("restrict"),
+    foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [trackerProjects.id],
+      name: "nidday_procurement_contracts_project_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("NIDDAY procurement contracts are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
+);
+
+export const niddayProjectMilestones = pgTable(
+  "nidday_project_milestones",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    projectId: uuid("project_id").notNull(),
+    name: text().notNull(),
+    status: projectMilestoneStatusEnum().default("planned").notNull(),
+    dueDate: date("due_date"),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    progress: numeric({ precision: 5, scale: 2 }).default("0").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("nidday_project_milestones_team_project_idx").on(
+      table.teamId,
+      table.projectId,
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_project_milestones_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.projectId],
+      foreignColumns: [trackerProjects.id],
+      name: "nidday_project_milestones_project_id_fkey",
+    }).onDelete("cascade"),
+    pgPolicy("NIDDAY project milestones are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
+);
+
+export const niddayTraceabilityLinks = pgTable(
+  "nidday_traceability_links",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    linkType: traceabilityLinkTypeEnum("link_type").notNull(),
+    sourceType: text("source_type").notNull(),
+    sourceId: text("source_id").notNull(),
+    targetType: text("target_type").notNull(),
+    targetId: text("target_id").notNull(),
+    createdBy: uuid("created_by"),
+    metadata: jsonb().default(sql`'{}'::jsonb`).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("nidday_traceability_links_unique").on(
+      table.teamId,
+      table.linkType,
+      table.sourceType,
+      table.sourceId,
+      table.targetType,
+      table.targetId,
+    ),
+    index("nidday_traceability_links_team_source_idx").on(
+      table.teamId,
+      table.sourceType,
+      table.sourceId,
+    ),
+    index("nidday_traceability_links_team_target_idx").on(
+      table.teamId,
+      table.targetType,
+      table.targetId,
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_traceability_links_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.createdBy],
+      foreignColumns: [users.id],
+      name: "nidday_traceability_links_created_by_fkey",
+    }).onDelete("set null"),
+    pgPolicy("NIDDAY traceability links are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN (SELECT private.get_teams_for_authenticated_user()))`,
+    }),
+  ],
 );
