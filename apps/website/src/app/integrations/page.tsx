@@ -5,11 +5,11 @@ import { createPageMetadata } from "@/lib/metadata";
 export const metadata = createPageMetadata({
   title: "Integrations",
   description:
-    "Connect Midday with your favorite tools. Explore integrations for email, accounting, productivity, and more.",
+    "Connect NIDDAY with your favorite tools. Explore integrations for email, accounting, productivity, and more.",
   path: "/integrations",
   og: {
     title: "Integrations",
-    description: "Connect Midday with your favorite tools",
+    description: "Connect NIDDAY with your favorite tools",
   },
 });
 
