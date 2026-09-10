@@ -2,13 +2,13 @@ import { StartPage } from "@/components/startpage";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata = createPageMetadata({
-  title: "Midday — The business stack for modern founders",
+  title: "NIDDAY — Financial Intelligence & Public Traceability",
   description:
-    "Invoicing, automatic reconciliation, time tracking, documents, and financial exports in one place. The business stack that replaces the tools you've outgrown.",
+    "A financial intelligence and public traceability platform for organizations that need clear, accountable records from financial activity to evidence and outcomes.",
   path: "/",
   og: {
-    title: "Midday",
-    description: "The business stack for modern founders",
+    title: "NIDDAY",
+    description: "Financial Intelligence & Public Traceability",
   },
 });
 
