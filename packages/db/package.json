@@ -27,6 +27,8 @@
     "./queries": "./src/queries/index.ts",
     "./errors": "./src/errors.ts",
     "./schema": "./src/schema.ts",
+    "./security/nidday-rbac": "./src/security/nidday-rbac.ts",
+    "./security/nidday-modules": "./src/security/nidday-modules.ts",
     "./sql": "./src/sql.ts",
     "./utils/api-keys": "./src/utils/api-keys.ts",
     "./utils/search-query": "./src/utils/search-query.ts",
