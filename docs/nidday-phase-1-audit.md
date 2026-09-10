@@ -60,4 +60,4 @@ Vercel alone is not an appropriate runtime for BullMQ workers, schedulers, queue
 
 ## Image handling
 
-The supplied institutional marks are not copied into repository assets by this phase because no source files or usage authorization accompanied them. Before adding any institutional logo to the public site, obtain the original asset file, confirm permission and brand-placement rules, add meaningful alt text, and optimize the approved file for web delivery. The platform should not imply endorsement by an institution.
+The supplied institutional marks were delivered as chat attachments, but their original binary files were not available in the repository workspace for a safe web-optimized commit. They are therefore not copied into repository assets. The landing page now includes an institutional-use guardrail that explicitly avoids an endorsement claim. Before adding any institutional logo to the public site, obtain the original asset file, confirm permission and brand-placement rules, add meaningful alt text, and optimize the approved file for web delivery. The platform should not imply endorsement by an institution.

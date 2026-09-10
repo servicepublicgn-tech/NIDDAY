@@ -10,9 +10,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { HeaderIntegrationsPreview } from "./header-integrations-preview";
+import { NiddayMark } from "./nidday-mark";
 import type { Testimonial } from "./sections/testimonials-section";
 import { defaultTestimonials } from "./sections/testimonials-section";
-import { NiddayMark } from "./nidday-mark";
 
 // All testimonials for header rotation (includes default + new ones)
 const headerTestimonials: Testimonial[] = [
@@ -532,7 +532,7 @@ export function Header({
                                   Customer Stories
                                 </span>
                                 <span className="font-sans text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-200">
-                                  See how founders use Midday
+                                  See how teams use NIDDAY
                                 </span>
                               </div>
                               {(() => {
@@ -641,7 +641,7 @@ export function Header({
                                 {
                                   href: "/docs",
                                   title: "Documentation",
-                                  desc: "Learn how to use Midday.",
+                                  desc: "Learn how to use NIDDAY.",
                                   external: false,
                                 },
                                 {
@@ -685,7 +685,7 @@ export function Header({
                                 {
                                   href: "https://api.midday.ai",
                                   title: "Developer & API",
-                                  desc: "Programmatic access to Midday.",
+                                  desc: "Programmatic access to NIDDAY.",
                                   external: true,
                                 },
                                 {

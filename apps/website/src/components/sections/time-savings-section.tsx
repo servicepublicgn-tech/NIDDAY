@@ -144,7 +144,7 @@ export function TimeSavingsSection() {
                       Manual work caused by disconnected tools.
                     </span>
                     <span className="hidden group-hover:inline transition-opacity duration-200">
-                      Midday handles the busywork so you can focus on running
+                      NIDDAY handles the busywork so you can focus on running
                       the business.
                     </span>
                   </p>

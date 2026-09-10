@@ -195,6 +195,29 @@ export const reportTypesEnum = pgEnum("reportTypes", [
 ]);
 
 export const teamRolesEnum = pgEnum("teamRoles", ["owner", "member"]);
+export const niddayRoleEnum = pgEnum("nidday_role", [
+  "owner",
+  "administrator",
+  "finance_manager",
+  "auditor",
+  "project_manager",
+  "operator",
+  "reviewer",
+  "viewer",
+]);
+export const evidenceStatusEnum = pgEnum("evidence_status", [
+  "pending",
+  "verified",
+  "rejected",
+  "superseded",
+]);
+export const auditSourceEnum = pgEnum("audit_source", [
+  "api",
+  "user",
+  "worker",
+  "integration",
+  "system",
+]);
 export const trackerStatusEnum = pgEnum("trackerStatus", [
   "in_progress",
   "completed",
@@ -3894,6 +3917,193 @@ export const notificationSettings = pgTable(
       for: "all",
       to: ["public"],
       using: sql`(user_id = auth.uid())`,
+    }),
+  ],
+);
+
+/**
+ * Additive NIDDAY RBAC assignments. `users_on_team.role` remains the legacy
+ * owner/member compatibility field; these assignments express the least-
+ * privilege roles required by new institutional workflows.
+ */
+export const niddayRoleAssignments = pgTable(
+  "nidday_role_assignments",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    userId: uuid("user_id").notNull(),
+    role: niddayRoleEnum().notNull(),
+    grantedBy: uuid("granted_by"),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "string" }),
+  },
+  (table) => [
+    uniqueIndex("nidday_role_assignments_active_unique")
+      .on(
+        table.teamId,
+        table.userId,
+        table.role,
+      )
+      .where(sql`revoked_at IS NULL`),
+    index("nidday_role_assignments_team_user_idx").on(
+      table.teamId,
+      table.userId,
+    ),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "nidday_role_assignments_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "nidday_role_assignments_user_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.grantedBy],
+      foreignColumns: [users.id],
+      name: "nidday_role_assignments_granted_by_fkey",
+    }).onDelete("set null"),
+    pgPolicy("NIDDAY role assignments are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Central metadata record for an evidence object. Files stay in the existing
+ * storage abstraction; this table never makes a storage key public by itself.
+ */
+export const evidenceItems = pgTable(
+  "evidence_items",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    documentId: uuid("document_id"),
+    ownerId: uuid("owner_id"),
+    externalId: text("external_id").notNull(),
+    storageProvider: text("storage_provider").notNull(),
+    storageKey: text("storage_key").notNull(),
+    sha256: varchar("sha256", { length: 64 }),
+    contentType: text("content_type"),
+    byteSize: bigint("byte_size", { mode: "number" }),
+    status: evidenceStatusEnum().default("pending").notNull(),
+    metadata: jsonb().default(sql`'{}'::jsonb`).notNull(),
+    verifiedAt: timestamp("verified_at", { withTimezone: true, mode: "string" }),
+    verifiedBy: uuid("verified_by"),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    unique("evidence_items_team_external_id_unique").on(
+      table.teamId,
+      table.externalId,
+    ),
+    index("evidence_items_team_created_idx").on(
+      table.teamId,
+      table.createdAt.desc(),
+    ),
+    index("evidence_items_document_idx").on(table.documentId),
+    index("evidence_items_sha256_idx").on(table.sha256),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "evidence_items_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.documentId],
+      foreignColumns: [documents.id],
+      name: "evidence_items_document_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.ownerId],
+      foreignColumns: [users.id],
+      name: "evidence_items_owner_id_fkey",
+    }).onDelete("set null"),
+    foreignKey({
+      columns: [table.verifiedBy],
+      foreignColumns: [users.id],
+      name: "evidence_items_verified_by_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Evidence items are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
+    }),
+  ],
+);
+
+/**
+ * Append-only audit ledger for security and traceability events. Application
+ * services write it; database policies allow team-scoped reads only.
+ */
+export const auditEvents = pgTable(
+  "audit_events",
+  {
+    id: uuid().defaultRandom().primaryKey().notNull(),
+    teamId: uuid("team_id").notNull(),
+    actorId: uuid("actor_id"),
+    action: text().notNull(),
+    resourceType: text("resource_type").notNull(),
+    resourceId: text("resource_id"),
+    source: auditSourceEnum().notNull(),
+    correlationId: text("correlation_id"),
+    previousState: jsonb("previous_state"),
+    nextState: jsonb("next_state"),
+    metadata: jsonb().default(sql`'{}'::jsonb`).notNull(),
+    integrityHash: varchar("integrity_hash", { length: 64 }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+      mode: "string",
+    })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    index("audit_events_team_created_idx").on(
+      table.teamId,
+      table.createdAt.desc(),
+    ),
+    index("audit_events_resource_idx").on(
+      table.teamId,
+      table.resourceType,
+      table.resourceId,
+    ),
+    index("audit_events_correlation_idx").on(table.correlationId),
+    foreignKey({
+      columns: [table.teamId],
+      foreignColumns: [teams.id],
+      name: "audit_events_team_id_fkey",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.actorId],
+      foreignColumns: [users.id],
+      name: "audit_events_actor_id_fkey",
+    }).onDelete("set null"),
+    pgPolicy("Audit events are visible to team members", {
+      as: "permissive",
+      for: "select",
+      to: ["authenticated"],
+      using: sql`(team_id IN ( SELECT private.get_teams_for_authenticated_user() AS get_teams_for_authenticated_user))`,
     }),
   ],
 );

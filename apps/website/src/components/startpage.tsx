@@ -48,6 +48,12 @@ const TestimonialsSection = dynamic(
 const IntegrationsSection = dynamic(() =>
   import("./sections/integrations-section").then((m) => m.IntegrationsSection),
 );
+const TraceabilityFoundation = dynamic(() =>
+  import("./traceability-foundation").then((m) => m.TraceabilityFoundation),
+);
+const PresidentialTribute = dynamic(() =>
+  import("./presidential-tribute").then((m) => m.PresidentialTribute),
+);
 
 // Static features data - moved outside component to avoid recreation on each render
 const features = [
@@ -80,7 +86,8 @@ const videos = [
   {
     id: "overview",
     title: "Overview",
-    subtitle: "See how NIDDAY connects financial activity to accountable outcomes.",
+    subtitle:
+      "See how NIDDAY connects financial activity to accountable outcomes.",
     url: "https://cdn.midday.ai/videos/login-video.mp4",
   },
   {
@@ -128,6 +135,7 @@ const videos = [
 ];
 
 export function StartPage() {
+  const platformUrl = process.env.NEXT_PUBLIC_APP_URL;
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isPosterLoaded, setIsPosterLoaded] = useState(false);
@@ -274,11 +282,11 @@ export function StartPage() {
                 </Link>
 
                 <h1 className="font-serif text-3xl sm:text-3xl md:text-4xl lg:text-6xl xl:text-7xl 2xl:text-7xl 3xl:text-8xl leading-[1.1] tracking-tight text-foreground">
-                  Financial intelligence with{" "}
+                  Financial Intelligence &{" "}
                   <em className="not-italic text-muted-foreground/80">
-                    modern
+                    Public
                   </em>{" "}
-                  public traceability
+                  Traceability
                 </h1>
 
                 <p className="text-muted-foreground text-base lg:text-lg leading-relaxed font-sans max-w-xl mx-auto">
@@ -293,21 +301,27 @@ export function StartPage() {
                   asChild
                   className="btn-inverse h-11 px-6 transition-colors"
                 >
-                  <a
-                    href={process.env.NEXT_PUBLIC_APP_URL ?? "#"}
-                    onClick={() =>
-                      track({
-                        event: LogEvents.CTA.name,
-                        channel: LogEvents.CTA.channel,
-                        label: "Start your trial",
-                        position: "hero",
-                      })
-                    }
-                  >
-                    <span className="text-inherit text-sm">
-                      Access the platform
+                  {platformUrl ? (
+                    <a
+                      href={platformUrl}
+                      onClick={() =>
+                        track({
+                          event: LogEvents.CTA.name,
+                          channel: LogEvents.CTA.channel,
+                          label: "Access the platform",
+                          position: "hero",
+                        })
+                      }
+                    >
+                      <span className="text-inherit text-sm">
+                        Access the platform
+                      </span>
+                    </a>
+                  ) : (
+                    <span aria-disabled="true" className="cursor-not-allowed">
+                      Platform URL required
                     </span>
-                  </a>
+                  )}
                 </Button>
 
                 <p className="text-muted-foreground text-xs font-sans">
@@ -879,6 +893,17 @@ export function StartPage() {
           </div>
         </div>
       </section>
+
+      {/* Divider */}
+      <div className="max-w-[1400px] mx-auto">
+        <div className="h-px w-full border-t border-border" />
+      </div>
+
+      {/* NIDDAY public traceability direction */}
+      <TraceabilityFoundation />
+
+      {/* Institutional portrait supplied for the Guinea landing page */}
+      <PresidentialTribute />
 
       {/* Divider */}
       <div className="max-w-[1400px] mx-auto">

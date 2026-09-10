@@ -3,10 +3,10 @@ import { createPageMetadata } from "@/lib/metadata";
 export const metadata = createPageMetadata({
   title: "About",
   description:
-    "About Midday. Learn more about the team and company behind your AI-powered business assistant.",
+    "About NIDDAY. Learn more about the team and company behind your AI-powered business assistant.",
   path: "/about",
   og: {
-    title: "About Midday",
+    title: "About NIDDAY",
     description: "The team behind your business stack",
   },
 });
